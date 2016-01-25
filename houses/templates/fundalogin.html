@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="center-block text-center" style="width:200px;";>
+            <h3><img class="profile-img" src="http://assets.fstatic.nl/741/assets/components/logo/funda-logo.svg" alt=""></h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="center-block text-center" style="width:200px;background-color:#FAC74C";>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Submit" />
+            </form>
+        </div>
+    </div>
+{% endblock %}

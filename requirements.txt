@@ -1,0 +1,9 @@
+Django==1.9.1
+wheel==0.24.0
+requests
+beautifulsoup4
+unidecode
+django-leaflet
+project-runpy
+hendrix
+txsockjs

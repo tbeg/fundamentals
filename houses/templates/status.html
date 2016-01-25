@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% load leaflet_tags %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<h3 class="text-left text-info">TOTAAL AANTAL BEWAARDE WONINGEN: {{ total }}
+            <script type="text/javascript">
+                function map_init_basic (map, options) {
+                    var markerArray = [];
+                    {% for house in houses %}
+                    markerArray.push(L.marker([{{ house.lat }}, {{ house.lon }}]));
+                    {% endfor %}
+                    var group = L.featureGroup(markerArray).addTo(map);
+                    map.fitBounds(group.getBounds());
+                }
+            </script>
+
+            {% leaflet_map "yourmap" callback="window.map_init_basic" %}
+            </h3>
+		</div>
+	</div>
+    {% for house in houses_pag %}
+	<div class="row">
+		<div class="col-md-2">
+			<img src="{{ house.image }}" class="img-responsive img-rounded"/>
+		</div>
+		<div class="col-md-4">
+            <ul class="pull-left"  >
+                <li>{{ house.strnumr }}</li>
+                <li>{{ house.postcod }} - {{ house.plaprov }}</li>
+                <li>{{ house.vrprijs }}</li>
+                <li>{{ house.sqprijs }}</li>
+                <li>{{ house.woonopp }}</li>
+            </ul>
+		</div>
+		<div class="col-md-4">
+            <ul>
+                <li><a href="{{ house.link }}">bekijk op funda</a></li>
+                <li><a href="{{ house.dellink }}">verwijder op funda</a></li>
+            </ul>
+		</div>
+		<div class="col-md-2">
+			<button type="button" class="btn btn-default">
+				Update
+			</button>
+		</div>
+	</div>
+    {% endfor %}
+    <div class="pagination">
+        <span class="step-links">
+            {% if houses_pag.has_previous %}
+                <a href="?page={{ houses_pag.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ houses_pag.number }} of {{ houses_pag.paginator.num_pages }}.
+            </span>
+
+            {% if houses_pag.has_next %}
+                <a href="?page={{ houses_pag.next_page_number }}">next</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+store:
+  container_name: fundamentals-data
+  image: busybox
+  volumes:
+      - /var/lib/postgresql/data
+  command: /bin/true
+
+rdbms:
+  image: mdillon/postgis:latest
+  volumes_from:
+    - store
+  environment:
+    - POSTGRES_PASSWORD=postgres
+    - POSTGRES_DB=fundadata
+  ports:
+  - "5434:5432"
+
+web:
+  build: .
+  #command: bash -c "service ssh start && sleep 10 && python manage.py runserver 0.0.0.0:8000"
+  command: bash -c "service ssh start && sleep 10 && hx start --dev --traceback"
+  volumes:
+  - .:/fundamentals
+  environment:
+  - VIRTUAL_HOST=funda.flemingh.net
+  - VIRTUAL_PORT=8000
+  ports:
+  - "8000:8000"
+  - "2222:22"
+  links:
+  - rdbms
