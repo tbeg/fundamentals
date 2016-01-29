@@ -9,6 +9,9 @@ from django.contrib.gis.geos import GEOSGeometry
 
 from models import House
 
+from django.template import Context, loader
+from hendrix.contrib.async.messaging import hxdispatcher
+
 # TODO: move to settings?
 # remove object url
 # "/mijn/objectactions/removesavedobject/?internalId=21026942-0638-4b06-ac6c-c8d868732925&amp;tinyId=49694610"
@@ -102,20 +105,32 @@ def scrape_funda(username, password):
                 rdxy = [0, 0]
                 pnt = GEOSGeometry('POINT({0} {1})'.format(0, 0), srid=4326)
 
-            House.objects.get_or_create(fuid=funda_id,
-                                        image=image_src,
-                                        address=street_nr + ' ' + postalcode_city,
-                                        strnumr=street_nr,
-                                        postcod=postcode,
-                                        plaprov=city,
-                                        woonopp=woonopp,
-                                        percopp=percopp,
-                                        vrprijs=price,
-                                        sqprijs=sqprice,
-                                        link=lnk,
-                                        dellink='http://www.funda.nl' + object_handle,
-                                        rdx=rdxy[0],
-                                        rdy=rdxy[1],
-                                        lat=pnt.y,
-                                        lon=pnt.x,
-                                        geom=pnt)
+            cm = House.objects.create(
+                fuid=funda_id,
+                image=image_src,
+                address=street_nr + ' ' + postalcode_city,
+                strnumr=street_nr,
+                postcod=postcode,
+                plaprov=city,
+                woonopp=woonopp,
+                percopp=percopp,
+                vrprijs=price,
+                sqprijs=sqprice,
+                link=lnk,
+                dellink='http://www.funda.nl' + object_handle,
+                rdx=rdxy[0],
+                rdy=rdxy[1],
+                lat=pnt.y,
+                lon=pnt.x,
+                sender='backend',
+                channel='homepage',
+                content='yo',
+                geom=pnt
+            )
+
+            t = loader.get_template('message.html')
+            hxdispatcher.send(cm.channel, {
+                'html': t.render(Context({'message': cm})),
+                'lat': pnt.y,
+                'lon': pnt.x
+            })

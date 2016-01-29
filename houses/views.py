@@ -7,28 +7,26 @@ from .forms import FundaLoginForm
 from hendrix.experience import crosstown_traffic
 
 
-def status(request):
+def status(request, channel_name=None):
 
-    total = House.objects.count()
-    houses = House.objects.all()
+    """
+        if we have a chat_channel_name kwarg,
+        have the response include that channel name
+        so the javascript knows to subscribe to that
+        channel...
+    """
 
-    paginator = Paginator(houses, 4) # Show 25 contacts per page
-    page = request.GET.get('page')
-
-    try:
-        houses_pag = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        houses_pag = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        houses_pag = paginator.page(paginator.num_pages)
+    if not channel_name:
+        channel_name = 'homepage'
 
     context = {
-        'total': total,
-        'houses': houses,
-        'houses_pag': houses_pag
+        'address': channel_name,
+        'history': [],
     }
+
+    if House.objects.filter(channel=channel_name).exists():
+        context['history'] = House.objects.filter(
+            channel=channel_name)
 
     return render(request, 'status.html', context)
 

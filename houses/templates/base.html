@@ -1,18 +1,69 @@
 {% load staticfiles %}
-{% load leaflet_tags %}
 <html>
-  <head>
-      <link href="{% static 'mystyles.css' %}" rel="stylesheet" media="screen">
-      <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
-      {% leaflet_js %}
-      {% leaflet_css %}
-  </head>
-  <body>
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}houses - {{address|default:"global"}}{% endblock title %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+        <style>
+            body {
+            padding: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+            background-color: #092e20;
+            font-family: Arial, san-serif;
+            }
 
-    {% block content %}
+            div#container{
+            min-width:55em;
+            max-width: 100em;
+            margin: 0 auto;
+            background-color: rgb(35, 79, 50);
+            min-height: 10em;
+            padding:10px;
+            }
 
-    {% endblock %}
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-  </body>
+            div#header{
+            background-color:#94da3a;
+            border-bottom:6px solid #092e20;
+            padding:.5em;
+            color:white;
+            font-size:2em;
+            }
+
+            #chat{
+            width:60%;
+            }
+
+            #chat_entry{
+            width:100%;
+            }
+
+            #history{
+            background-color:#eee;
+            padding:10px;
+            margin:0px;
+            border-radius:5px;
+            width:100%;
+            height: 300px;
+            overflow: auto;
+            }
+
+            #history li{
+            list-style: none;
+            padding:6px;
+            margin:2px;]
+            font-size:1.1em;
+            }
+
+
+        </style>
+    </head>
+    <body>
+        {% block content %}
+
+        {% endblock %}
+    </body>
 </html>

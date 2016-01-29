@@ -4,7 +4,7 @@ from . import views
 
 
 urlpatterns = [
-    url(r'^status/', views.status, name='status'),
+    url(r'^status/?(?P<channel_name>\w+)?', views.status, name='status'),
     url(r'^fundalogin/', views.funda_login, name='fundalogin'),
 ]
 
