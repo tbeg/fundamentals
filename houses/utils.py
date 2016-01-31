@@ -90,7 +90,8 @@ def scrape_funda(username, password):
             else:
                 sqprice = price / woonopp
 
-            pcode = street_nr + " " + postalcode_city
+            #pcode = street_nr + " " + postalcode_city
+            pcode = street_nr + " " + postcode
             url = GEOCODE_URL + pcode
             response = requests.get(url)
             try:
@@ -128,9 +129,21 @@ def scrape_funda(username, password):
                 geom=pnt
             )
 
-            t = loader.get_template('message.html')
+            #t = loader.get_template('message.html')
             hxdispatcher.send(cm.channel, {
-                'html': t.render(Context({'message': cm})),
+                #'html': t.render(Context({'message': cm})),
+                'fuid': funda_id,
+                'image': image_src,
+                'address': street_nr + ' ' + postalcode_city,
+                'strnumr': street_nr,
+                'postcod': postcode,
+                'plaprov': city,
+                'woonopp': woonopp,
+                'percopp': percopp,
+                'vrprijs': price,
+                'sqprijs': sqprice,
+                'link': lnk,
+                'dellink': 'http://www.funda.nl' + object_handle,
                 'lat': pnt.y,
                 'lon': pnt.x
             })

@@ -1,16 +1,10 @@
 {% extends "base.html" %}
-{% load staticfiles %}
 {% block content %}
 
 <div class="container-fluid">
 	<div class="row">
-		<div class="col-md-12">
-            <div id="map" style="height: 400px; width:100%"> </div>
-            <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-            <!-- JQUERY is not needed but lets just be nice to ourselves... -->
-            <script src="{% static 'bootstrap/js/jquery-1.11.0.js' %}"></script>
-            <!-- sock.js is very highly recomended (required even!) for implementing websockets. -->
-            <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+		<div class="col-md-6">
+            <div id="map"></div>
             <script type="text/javascript">
 
                 {% if address %}
@@ -20,77 +14,109 @@
                 {% endif %}
 
                 var map = L.map('map');
+                var markers = new Array();
 
                 L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
                 maxZoom: 18
                 }).addTo(map);
 
-                //
+                map.locate({setView: true, maxZoom: 15});
 
-                {% if history %}
-                    var markerArray = [];
-                    {% for message in history %}
-                        markerArray.push(L.marker([{{ message.lat }}, {{ message.lon }}]));
-                    {% endfor %}
-                    var group = L.featureGroup(markerArray).addTo(map);
-                    map.fitBounds(group.getBounds());
-                {% else %}
-                    map.locate({setView: true, maxZoom: 8});
-                    var markerArray = [];
-                    //see: http://ipasic.com/article/create-real-time-web-gis-applications-html5-websockets-and-tornado/
-                    function DisplayNewPosition(lat,lon) {
-                        //marker = L.marker([lat,lon]).addTo(map);
-                        //map.setView([lat,lon], 12);
-                        markerArray.push(L.marker([lat,lon]));
-                        var group = L.featureGroup(markerArray).addTo(map);
-                        map.fitBounds(group.getBounds());
+                // Custom icon class without iconUrl
+                var customIcon = L.Icon.extend({
+                    options: {
+                        shadowUrl: 'http://leafletjs.com/docs/images/leaf-shadow.png',
+                        iconSize:     [38, 95],
+                        shadowSize:   [50, 64],
+                        iconAnchor:   [22, 94],
+                        shadowAnchor: [4, 62],
+                        popupAnchor:  [-3, -76]
                     }
-                {% endif %}
+                });
 
+                // Function for getting new default icon
+                function getDefaultIcon () {
+                    return new L.Icon.Default();
+                }
+
+                // Function for getting new highlight icon
+                function getHighlightIcon () {
+                    return new customIcon({
+                        iconUrl: 'http://leafletjs.com/docs/images/leaf-red.png'
+                    });
+                }
+
+                // Variable to keep track of highlighted marker
+                var highlight = null;
+
+                // Function for removing highlight
+                function removeHighlight () {
+                    // Check for highlight
+                    if (highlight !== null) {
+                        // Set default icon
+                        highlight.setIcon(getDefaultIcon());
+                        // Unset highlight
+                        highlight = null;
+                      }
+                }
 
                 var setup_chat = function(sock){
-
-                    //this is
-                    $('#chat_entry').on('keypress',function(e){
-                        //send on enter key pressed...
-                        if (e.keyCode === 13){
-                            $el = $(this);
-
-                            sock.send(
-                                JSON.stringify({
-
-                                    // make sure what you put in the socket is what your
-                                    // backend code is expecting
-
-                                    message:$el.val(),
-                                    sender :$('#nickname').val() || 'anonymous',
-                                    channel:SOCKET_ADDRESS
-                                }))
-
-                            $(this).val('');
-                        }
-                    })
 
                     sock.onmessage = function(e) {
                         //
 
                         var data = JSON.parse(e.data);
 
-
-                        if(data.html){
-                            $('#empty').remove();
-                            $('#history').append($(data.html));
-                            $("#history").animate({ scrollTop: $('#history')[0].scrollHeight}, 1000);
-
-                        }
-                        if(data.lat){
-                            console.log(data.lat);
+                        if(data.lat) {
                             var object = JSON.parse(e.data);
-                            lat=object.lat
-                            lon=object.lon
-                            console.log("Lat: " + lat +", Lon: "+lon);
-                            DisplayNewPosition(lat,lon);
+                            lat=object.lat;
+                            lon=object.lon;
+                            fimage=object.image;
+                            strnumr=object.strnumr;
+
+                            function onMarkerClick(e) {
+                                $('div').removeClass('active');
+                                $('div #' + e.target._leaflet_id).addClass('active');
+
+                                /* see: http://stackoverflow.com/questions/9235167/jquery-animate-scrolltop-not-working-properly*/
+                                var position = $('div #' + e.target._leaflet_id).position().top + $('#history').scrollTop()
+                                $('#history').animate({ scrollTop: position })
+
+                                removeHighlight();
+                                // Set highlight icon
+                                marker.setIcon(getHighlightIcon());
+                                // Assign highlight
+                                highlight = marker;
+
+                                map.panTo(e.target.getLatLng());
+                            }
+
+                            $('.item').on("click", function () {
+                                $('div').removeClass('active');
+                                $(this).addClass('active');
+                                var mid = $(this).attr('id');
+                                var LatLng = markers[mid].getLatLng();
+
+                                removeHighlight();
+                                // Set highlight icon
+                                markers[mid].setIcon(getHighlightIcon());
+                                // Assign highlight
+                                highlight = markers[mid];
+
+                                map.panTo(LatLng);
+                            });
+
+                            var marker = new L.Marker([lat,lon]);
+                            marker.on('click', onMarkerClick);
+                            map.addLayer(marker);
+                            map.setView([lat,lon], 15);
+                            markers[marker._leaflet_id] = marker;
+
+                            $('#history').append('<p></p><div class="item" id="' + marker._leaflet_id + '"><div class="row"><div class="col-md-6"><img src="' + fimage + '" class="img-responsive img-rounded"/></div><div class="col-md-6"><ul class="pull-left"><li>' + strnumr + '</li></ul></div></div></div>');
+                            //$('#history').append('<div class="item" id="' + marker._leaflet_id + '"><div class="row"><p></p><div class="col-md-6"><img src="' + fimage + '" class="img-responsive img-rounded"/></div><div class="col-md-6"><ul class="pull-left"><li>' + strnumr + '</li><li>{{ message.postcod }}, {{ message.plaprov }}</li><li>Vraagprijs: {{ message.vrprijs }}</li><li>Prijs / m2: {{ message.sqprijs }}</li><li>Woonoppervlak: {{ message.woonopp }} m2</li></ul></div></div></div>');
+;
+                            $("#history").animate({ scrollTop: $('#history')[0].scrollHeight}, 1000);
                         }
                     }
                 }
@@ -112,23 +138,73 @@
 
                         setup_chat(this);
 
+                        if (sock.readyState === 1) {
+                            console.log("Connection is made");
+                        }
+
                         $("#history").animate({ scrollTop: $('#history')[0].scrollHeight}, 1000);
                     };
                 })
             </script>
 		</div>
-    </div>
-    <div><p></p></div>
-	<div class="row">
-		<div class="col-md-12">
+		<div class="col-md-6">
             <div id="history">
-            {% for message in history %}
-                {% include 'message.html' %}
-            {% empty %}
-                <li id="empty">no history</li>
-            {% endfor %}
+            {% if history %}
+                <script>
+
+                    //map.locate({setView: true, maxZoom: 15});
+
+                    function onMarkerClick(e) {
+                        $('div').removeClass('active');
+                        $('div #' + e.target._leaflet_id).addClass('active');
+
+                        /* see: http://stackoverflow.com/questions/9235167/jquery-animate-scrolltop-not-working-properly*/
+                        var position = $('div #' + e.target._leaflet_id).position().top + $('#history').scrollTop()
+                        $('#history').animate({ scrollTop: position })
+
+                        removeHighlight();
+                        // Set highlight icon
+                        markers[e.target._leaflet_id].setIcon(getHighlightIcon());
+                        // Assign highlight
+                        highlight = markers[e.target._leaflet_id];
+
+                        map.panTo(e.target.getLatLng());
+                    }
+
+                    {% for message in history %}
+
+                        lat={{ message.lat }};
+                        lon={{ message.lon }};
+                        fimage="{{ message.image }}";
+                        strnumr="{{ message.strnumr }}";
+
+                        var marker = new L.Marker([lat,lon]);
+                        marker.on('click', onMarkerClick);
+                        map.addLayer(marker);
+                        map.setView([lat,lon], 15);
+                        markers[marker._leaflet_id] = marker;
+
+                        $('#history').append('<p></p><div class="item" id="' + marker._leaflet_id + '"><div class="row"><div class="col-md-6"><img src="' + fimage + '" class="img-responsive img-rounded"/></div><div class="col-md-6"><ul class="pull-left"><li>' + strnumr + '</li></ul></div></div></div>');
+                        //$('#history').append('<div class="item" id="' + marker._leaflet_id + '"><div class="row"><p></p><div class="col-md-6"><img src="' + fimage + '" class="img-responsive img-rounded"/></div><div class="col-md-6"><ul class="pull-left"><li>' + strnumr + '</li><li>{{ message.postcod }}, {{ message.plaprov }}</li><li>Vraagprijs: {{ message.vrprijs }}</li><li>Prijs / m2: {{ message.sqprijs }}</li><li>Woonoppervlak: {{ message.woonopp }} m2</li></ul></div></div></div>');
+                        $("#history").animate({ scrollTop: $('#history')[0].scrollHeight}, 1000);
+                    {% endfor %}
+                    $('.item').on("click", function () {
+                        $('div').removeClass('active');
+                        $(this).addClass('active');
+                        var mid = $(this).attr('id');
+                        var LatLng = markers[mid].getLatLng();
+
+                        removeHighlight();
+                        // Set highlight icon
+                        markers[mid].setIcon(getHighlightIcon());
+                        // Assign highlight
+                        highlight = markers[mid];
+                        map.panTo(LatLng);
+                    });
+                </script>
+            {% endif %}
             </div>
-        </div>
+		</div>
 	</div>
 </div>
 
