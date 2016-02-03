@@ -172,21 +172,14 @@
                     }
 
                     {% for message in history %}
-
-                        lat={{ message.lat }};
-                        lon={{ message.lon }};
-                        fimage="{{ message.image }}";
-                        strnumr="{{ message.strnumr }}";
-
-                        var marker = new L.Marker([lat,lon]);
+                        var marker = new L.Marker([{{ message.lat }},{{ message.lon }}]);
                         marker.on('click', onMarkerClick);
                         map.addLayer(marker);
-                        map.setView([lat,lon], 15);
+                        map.setView([{{ message.lat }},{{ message.lon }}], 15);
                         markers[marker._leaflet_id] = marker;
 
-                        $('#history').append('<p></p><div class="item" id="' + marker._leaflet_id + '"><div class="row"><div class="col-md-6"><img src="' + fimage + '" class="img-responsive img-rounded"/></div><div class="col-md-6"><ul class="pull-left"><li>' + strnumr + '</li></ul></div></div></div>');
+                        $('#history').append('<p></p><div class="item" id="' + marker._leaflet_id + '"><div class="row"><div class="col-md-6"><img src="{{ message.image }}" class="img-responsive img-rounded"/></div><div class="col-md-6"><ul class="pull-left"><li>{{ message.strnumr }}</li><li>{{ message.postcod }}, {{ message.plaprov }}</li><li>Vraagprijs: {{ message.vrprijs }}</li><li>Prijs / m2: {{ message.sqprijs }}</li><li>Woonoppervlak: {{ message.woonopp }} m2</li></ul></div></div></div>');
                         //$('#history').append('<div class="item" id="' + marker._leaflet_id + '"><div class="row"><p></p><div class="col-md-6"><img src="' + fimage + '" class="img-responsive img-rounded"/></div><div class="col-md-6"><ul class="pull-left"><li>' + strnumr + '</li><li>{{ message.postcod }}, {{ message.plaprov }}</li><li>Vraagprijs: {{ message.vrprijs }}</li><li>Prijs / m2: {{ message.sqprijs }}</li><li>Woonoppervlak: {{ message.woonopp }} m2</li></ul></div></div></div>');
-                        $("#history").animate({ scrollTop: $('#history')[0].scrollHeight}, 1000);
                     {% endfor %}
                     $('.item').on("click", function () {
                         $('div').removeClass('active');

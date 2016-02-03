@@ -147,3 +147,4 @@ def scrape_funda(username, password):
                 'lat': pnt.y,
                 'lon': pnt.x
             })
+
