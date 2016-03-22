@@ -1,4 +1,4 @@
-Simple django app demonstrating async long running task & with twisted hendrix (https://github.com/hendrix/hendrix)! Cool!
+Simple django app demonstrating async long running task & sockets with twisted hendrix (https://github.com/hendrix/hendrix)!
 
 install docker & docker-compose
 
