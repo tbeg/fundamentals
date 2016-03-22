@@ -14,4 +14,4 @@ start:
 docker-compose up
 ```
 
-Provide your funda credentials on localhost:8000/fundalogin. You will be redirected to localhost:8000/status. Refresh the page to see your saved houses being added.....
+Provide your funda credentials on localhost:8000/fundalogin. You will be redirected to localhost:8000/status. Your saved houses are being added using sockets..
