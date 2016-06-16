@@ -47,10 +47,10 @@ def scrape_funda(username, password):
     resp = session.get(BEWRD_URL + 'p1')
     soup = BeautifulSoup(resp.text, "html5lib")
 
-    pagelinks = soup.find_all("a", attrs={"data-pagination-pagelink":True})
+    pagelinks = soup.find_all("a", attrs={"data-pagination-page":True})
     pages = []
     for page in pagelinks:
-        pages.append(int(page["data-pagination-pagelink"]))
+        pages.append(int(page["data-pagination-page"]))
     einde = max(pages) + 1
 
     for i in range(1, einde):
@@ -59,7 +59,7 @@ def scrape_funda(username, password):
     for page in links:
         html = session.get(page)
         soup = BeautifulSoup(html.text, "html5lib")
-        houses = soup.find('ul', class_='search-results search-results-saved-object').find_all('div', class_="search-result ")
+        houses = soup.find('ul', class_='search-results').find_all('li', class_="search-result ")
         for house in houses:
             raw_address = house.find('h3', class_='search-result-title').text
 
