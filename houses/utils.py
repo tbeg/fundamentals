@@ -45,6 +45,7 @@ def scrape_funda(username, password):
 
     links = list()
     resp = session.get(BEWRD_URL + 'p1')
+    
     soup = BeautifulSoup(resp.text, "html5lib")
 
     pagelinks = soup.find_all("a", attrs={"data-pagination-page":True})
@@ -148,4 +149,3 @@ def scrape_funda(username, password):
                 'lat': pnt.y,
                 'lon': pnt.x
             })
-

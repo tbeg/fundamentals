@@ -18,7 +18,7 @@ rdbms:
 web:
   build: .
   #command: bash -c "service ssh start && sleep 10 && python manage.py runserver 0.0.0.0:8000"
-  #command: bash -c "service ssh start && sleep 10 && hx start --dev"
+  command: bash -c "service ssh start && sleep 10 && hx start"
   #command: bash -c "service ssh start  && sleep 10 && echo hello"
   volumes:
   - .:/fundamentals

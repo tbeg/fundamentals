@@ -5,5 +5,6 @@ beautifulsoup4
 unidecode
 django-leaflet
 project-runpy
-hendrix
-txsockjs
+hendrix==2.0.0
+Twisted==15.2.1
+txsockjs==1.2.2
