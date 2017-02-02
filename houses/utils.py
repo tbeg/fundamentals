@@ -51,6 +51,7 @@ def scrape_funda(username, password):
     pages = []
     for page in pagelinks:
         pages.append(int(page["data-pagination-page"]))
+
     einde = max(pages) + 1
 
     for i in range(1, einde):

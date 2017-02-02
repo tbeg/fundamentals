@@ -1,4 +1,4 @@
-FROM phusion/baseimage
+FROM phusion/baseimage:0.9.18
 MAINTAINER Chilles
 
 RUN apt-get update && apt-get -y install vim python-psycopg2 \
