@@ -8,3 +8,5 @@ project-runpy
 hendrix==2.0.0
 Twisted==15.2.1
 txsockjs==1.2.2
+psycopg2
+lxml
